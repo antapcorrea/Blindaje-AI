@@ -1,17 +1,22 @@
-
 import streamlit as st
 import gspread
-from datetime import datetime
+import json
+import google.generativeai as genai
+from google.oauth2.service_account import Credentials
 
-# Función para conectar con Google Sheets
+# 1. Configurar conexión segura a Google Sheets
 def conectar_bd():
-    try:
-        # Lee el archivo que acabas de subir
-        gc = gspread.service_account(filename='credenciales.json')
-        # Abre tu hoja exacta
-        sh = gc.open('Base_Datos_Blindaje')
-        worksheet = sh.worksheet('Usuarios')
-        return worksheet
+    # Leer las credenciales desde los 'Secrets' de Streamlit
+    creds_dict = json.loads(st.secrets["GOOGLE_SHEETS_CREDENTIALS"])
+    creds = Credentials.from_service_account_info(creds_dict)
+    gc = gspread.authorize(creds)
+    sh = gc.open('Base_Datos_Blindaje')
+    return sh.worksheet('Usuarios')
+
+# 2. Configurar Gemini con seguridad
+genai.configure(api_key=st.secrets["AIzaSyBSdwhUqy4W3oNnhEQlb68x0Iq59esiw8I"])
+
+# ... (resto de tu código aquí) ...        return worksheet
     except Exception as e:
         st.error(f"Error de conexión. Asegúrate de que el archivo se llame 'credenciales.json' y la hoja 'Base_Datos_Blindaje'. Detalle: {e}")
         return None
